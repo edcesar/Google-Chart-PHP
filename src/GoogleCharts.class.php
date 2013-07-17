@@ -5,13 +5,11 @@
 *	Google Chart API Generator
 *
 *	@author		Olaf Erlandsen C. [Olaf Erlandsen]
-*	@author		http://www.arcanussystems.com
 *
 *	@package	GoogleCharts
 *	@copyright	Copyright 2012, Olaf Erlandsen
 *	@copyright	Dual licensed under the MIT or GPL Version 2 licenses.
-*	@copyright	http://www.arcanussystems.com/license
-*	@version	0.1
+*	@version	0.2
 *
 */
 class GoogleCharts
@@ -28,10 +26,8 @@ class GoogleCharts
 		'line'			=>	'LineChart',
 		'pie'			=>	'PieChart',
 		'scatter'		=>	'ScatterChart',
-		
 		'stepped'		=>	'SteppedAreaChart',
 		'steppedarea'	=>	'SteppedAreaChart',
-		
 		'table'			=>	'Table',
 		'tree'			=>	'TreeMap'
 	);
@@ -43,6 +39,7 @@ class GoogleCharts
 	protected	$useVarname			=	"GoogleChart";
 	protected	$listener			=	array();
 	protected	$firstRowAsData		=	false;
+	protected	$userActions		=	array();
 	/**
 	*	Define Chart Type
 	*
@@ -341,6 +338,21 @@ class GoogleCharts
 	{
 		$this->listener[] = "google.visualization.events.addListener(". $this->useVarname .",'". $event ."',function( ". $params ." ){". $content ."});";
 	}
+	
+	
+	/**
+	*	setAction
+	*
+	*	@method	object	setAction( [ array $data = array() ] )
+	*	@param	array	$data
+	*/
+	public function setAction( array $data = array() )
+	{
+		if( count( $data ) > 0 )
+		{
+			$this->userActions[] = $data;
+		}
+	}
 	/**
 	*	Define a listener
 	*
@@ -435,6 +447,13 @@ class GoogleCharts
 				$output .="google.setOnLoadCallback(function(){";
 			}
 				$output	 .= "var ". $this->useVarname ."=new google.visualization.".$this->useType."(document.getElementById( '". $this->getElementById ."' ));";
+				if( count( $this->userActions ) > 0 )
+				{
+					foreach( $this->userActions AS $data )
+					{
+						$output .= $this->useVarname . ".setAction(" . json_encode( $data , 0 ) . ");";
+					}
+				}
 				$output	.= $this->useVarname . ".draw(";
 				
 					$output	.= "google.visualization.arrayToDataTable(". json_encode( $this->ArrayToDataTable );
